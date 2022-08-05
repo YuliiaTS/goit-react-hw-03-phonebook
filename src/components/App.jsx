@@ -17,11 +17,11 @@ class App extends Component {
 
   onSubmit = newContact => {
     if (this.state.contacts.find(contact => contact.name === newContact.name)) {
-      return alert (newContact.name + 'is alredy in contacts.');
+      return alert(newContact.name + ' is alredy in contacts.');
     } else {
-      this.setState(({contacts}) => ({
+      this.setState(({ contacts }) => ({
         contacts: [newContact, ...contacts],
-      }))
+      }));
     }
   };
 
@@ -31,13 +31,24 @@ class App extends Component {
     }));
   };
 
-  onChange = e => (
-    this.setState({ filter: e.target.value })
-  );
+  onChange = e => this.setState({ filter: e.target.value });
+
+  componentDidMount() {
+    const parseContacts = JSON.parse(localStorage.getItem('contacts'));
+    if (parseContacts) {
+      this.setState({ contacts: parseContacts });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.contacts !== prevState.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
 
   render() {
     const { contacts, filter } = this.state;
-    const normalizedFilter = filter.toLocaleLowerCase()
+    const normalizedFilter = filter.toLocaleLowerCase();
     const phoneContacts = contacts.filter(contact =>
       contact.name.toLocaleLowerCase().includes(normalizedFilter)
     );
@@ -47,8 +58,11 @@ class App extends Component {
         <h1>Phonebook</h1>
         <ContactForm onSubmit={this.onSubmit} />
         <h2>Contacts</h2>
-        <Filter filter={filter} onChange={this.onChange}/>
-        <ContactList phoneContacts={phoneContacts} deleteContact={this.deleteContact}/>
+        <Filter filter={filter} onChange={this.onChange} />
+        <ContactList
+          phoneContacts={phoneContacts}
+          deleteContact={this.deleteContact}
+        />
       </div>
     );
   }
